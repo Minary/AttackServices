@@ -1,0 +1,6 @@
+C:\Users\run\code\Build\AttackServices\AttackServices\AttackServices\bin\Debug\AttackServices.dll
+C:\Users\run\code\Build\AttackServices\AttackServices\AttackServices\bin\Debug\AttackServices.pdb
+C:\Users\run\code\Build\AttackServices\AttackServices\AttackServices\bin\Debug\MinaryLib.dll
+C:\Users\run\code\Build\AttackServices\AttackServices\AttackServices\obj\Debug\AttackServices.dll
+C:\Users\run\code\Build\AttackServices\AttackServices\AttackServices\obj\Debug\AttackServices.pdb
+C:\Users\run\code\Build\AttackServices\AttackServices\AttackServices\obj\Debug\AttackServices.csprojResolveAssemblyReference.cache
