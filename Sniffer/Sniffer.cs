@@ -1,4 +1,4 @@
-﻿namespace Minary.AttackService
+﻿namespace Minary.AttackService.Main
 {
   using MinaryLib.AttackService.Class;
   using MinaryLib.AttackService.Enum;
@@ -9,30 +9,28 @@
   using System.IO;
 
 
-  public class Sniffer : IAttackService
+  public class AS_Sniffer : IAttackService
   {
 
     #region MEMBERS
-    
+
+    private const string serviceName = "Sniffer";
+
     private ServiceStatus serviceStatus;
     private AttackServiceParameters serviceParams;
     private Process snifferProc;
-    private Dictionary<string, SubModule> subModules;
 
     // Sniffer process config
-    public static string attackServicesDir = "attackservices";
-    private static string snifferServiceDir = Path.Combine(attackServicesDir, "Sniffer");
-    private static string snifferBinaryPath = Path.Combine(snifferServiceDir, "Sniffer.exe");
+    private static string snifferBinaryPath = Path.Combine(serviceName, "Sniffer.exe");
 
     #endregion
 
 
     #region PUBLIC
 
-    public Sniffer(AttackServiceParameters serviceParams, Dictionary<string, SubModule> subModules)
+    public AS_Sniffer(AttackServiceParameters serviceParams)
     {
       this.serviceParams = serviceParams;
-      this.subModules = subModules;
       this.serviceStatus = ServiceStatus.NotRunning;
 
       // Register attack service
@@ -59,7 +57,7 @@
 
       this.snifferProc.EnableRaisingEvents = false;
       this.snifferProc.Exited += null;
-      this.serviceParams.AttackServiceHost.OnServiceExited(this.serviceParams.ServiceName, exitCode);
+      this.serviceParams.AttackServiceHost.OnServiceExited(serviceName, exitCode);
     }
 
     #endregion
@@ -69,15 +67,9 @@
 
     #region PROPERTIES
 
-    public string ServiceName { get { return this.serviceParams.ServiceName; } set { } }
-
-    public string WorkingDirectory { get { return this.serviceParams.ServiceWorkingDir; } set { } }
-
-    public Dictionary<string, SubModule> SubModules { get { return this.subModules; } set { } }
+    public string ServiceName { get { return serviceName; } set { } }
 
     public ServiceStatus Status { get { return this.serviceStatus; } set { this.serviceStatus = value; } }
-
-    public IAttackServiceHost AttackServiceHost { get; set; }
 
     #endregion
 
@@ -86,16 +78,16 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters)
     {
-      string snifferBinaryFullPath = Path.Combine(Directory.GetCurrentDirectory(), snifferBinaryPath);
-      string workingDirectory = Path.Combine(Directory.GetCurrentDirectory(), snifferServiceDir);
+      string snifferBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, snifferBinaryPath);
+      string workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
       string processParameters = string.Format("-s {0} -p {1}", serviceParameters.SelectedIfcId, this.serviceParams.PipeName);
 
       this.snifferProc = new Process();
-      this.snifferProc.StartInfo.FileName = snifferBinaryPath;
+      this.snifferProc.StartInfo.FileName = snifferBinaryFullPath;
       this.snifferProc.StartInfo.Arguments = processParameters;
       this.snifferProc.StartInfo.WorkingDirectory = workingDirectory;
-      this.snifferProc.StartInfo.WindowStyle = this.serviceParams.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
-      this.snifferProc.StartInfo.CreateNoWindow = this.serviceParams.IsDebuggingOn ? true : false;
+      this.snifferProc.StartInfo.WindowStyle = this.serviceParams.AttackServiceHost.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
+      this.snifferProc.StartInfo.CreateNoWindow = this.serviceParams.AttackServiceHost.IsDebuggingOn ? true : false;
       this.snifferProc.EnableRaisingEvents = true;
       this.snifferProc.Exited += new EventHandler(this.OnServiceExited);
 

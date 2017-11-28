@@ -1,4 +1,4 @@
-﻿namespace Minary.AttackService
+﻿namespace Minary.AttackService.Main
 {
   using MinaryLib.AttackService.Class;
   using MinaryLib.AttackService.Enum;
@@ -9,38 +9,33 @@
   using System.IO;
 
 
-  public class ArpPoisoning : IAttackService
+  public class AS_ArpPoisoning : IAttackService
   {
 
     #region MEMBERS
-    
+
+    private const string serviceName = "ArpPoisoning";
+
     private ServiceStatus serviceStatus;
     private AttackServiceParameters serviceParams;
-    private Dictionary<string, SubModule> subModules;
     private Process poisoningEngProc;
 
     // APE process config
-    public static string apeFirewallRules = ".fwrules";
-    public static string apeTargetHosts = ".targethosts";
-    public static string dnsPoisoningHosts = ".dnshosts";
+    private static string firewallRulesFile = ".fwrules";
+    private static string targetHostsFile = ".targethosts";
+    private static string dnsPoisoningHostsFile = ".dnshosts";
 
-    public static string attackServicesDir = "attackservices";
-    public static string apeServiceDir = Path.Combine(attackServicesDir, "APE");
-    public static string apeBinaryPath = Path.Combine(apeServiceDir, "Ape.exe");
-    public static string apeProcessName = "Ape";
-    private static string apeFwRulesPath = Path.Combine(apeServiceDir, apeFirewallRules);
-    private static string apeTargetHostsPath = Path.Combine(apeServiceDir, apeTargetHosts);
-    public static string dnsPoisoningHostsPath = Path.Combine(apeServiceDir, dnsPoisoningHosts);
+    private static string apeProcessName = "Ape";
+    private static string apeBinaryPath = Path.Combine(serviceName, "Ape.exe");
 
     #endregion
 
 
     #region PUBLIC
 
-    public ArpPoisoning(AttackServiceParameters serviceParams, Dictionary<string, SubModule> subModules)
+    public AS_ArpPoisoning(AttackServiceParameters serviceParams)
     {
       this.serviceParams = serviceParams;
-      this.subModules = subModules;
       this.serviceStatus = ServiceStatus.NotRunning;
 
       // Register attack service
@@ -67,7 +62,7 @@
 
       this.poisoningEngProc.EnableRaisingEvents = false;
       this.poisoningEngProc.Exited += null;
-      this.serviceParams.AttackServiceHost.OnServiceExited(this.serviceParams.ServiceName, exitCode);
+      this.serviceParams.AttackServiceHost.OnServiceExited(serviceName, exitCode);
     }
 
     #endregion
@@ -77,15 +72,9 @@
 
     #region PROPERTIES
 
-    public string ServiceName { get { return this.serviceParams.ServiceName; } set { } }
-
-    public string WorkingDirectory { get { return this.serviceParams.ServiceWorkingDir; } set { } }
-
-    public Dictionary<string, SubModule> SubModules { get { return this.subModules; } set { } }
+    public string ServiceName { get { return serviceName; } set { } }
 
     public ServiceStatus Status { get { return this.serviceStatus; } set { this.serviceStatus = value; } }
-
-    public IAttackServiceHost AttackServiceHost { get; set; }
 
     #endregion
 
@@ -94,10 +83,10 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters)
     {
-      string targetHosts = string.Empty;
-      string workingDirectory = Path.Combine(Directory.GetCurrentDirectory(), apeServiceDir);
+      string targetHostsRecords = string.Empty;
+      string workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
+      string targetHostsFullPath = Path.Combine(workingDirectory, targetHostsFile);
       string timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
-      string targetHostsPath = apeTargetHostsPath;
       string processParameters = string.Format("-x {0}", serviceParameters.SelectedIfcId);
 
       if (string.IsNullOrEmpty(serviceParameters.SelectedIfcId))
@@ -115,25 +104,25 @@
       // Write APE targetSystem hosts to list
       foreach (string tmpTargetMac in serviceParameters.TargetList.Keys)
       {
-        targetHosts += string.Format("{0},{1}\r\n", serviceParameters.TargetList[tmpTargetMac], tmpTargetMac);
+        targetHostsRecords += string.Format("{0},{1}\r\n", serviceParameters.TargetList[tmpTargetMac], tmpTargetMac);
         this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.StartService(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, serviceParameters.TargetList[tmpTargetMac]);
       }
 
-      using (StreamWriter outputFile = new StreamWriter(targetHostsPath))
+      using (StreamWriter outputFile = new StreamWriter(targetHostsFullPath))
       {
-        targetHosts = targetHosts.Trim();
-        outputFile.Write(targetHosts);
+        targetHostsRecords = targetHostsRecords.Trim();
+        outputFile.Write(targetHostsRecords);
       }
 
       // Start process
-      string apeBinaryFullPath = Path.Combine(Directory.GetCurrentDirectory(), apeBinaryPath);
+      string apeBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, apeBinaryPath);
 
       this.poisoningEngProc = new Process();
       this.poisoningEngProc.StartInfo.WorkingDirectory = workingDirectory;
       this.poisoningEngProc.StartInfo.FileName = apeBinaryFullPath;
       this.poisoningEngProc.StartInfo.Arguments = processParameters;
-      this.poisoningEngProc.StartInfo.WindowStyle = this.serviceParams.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
-      this.poisoningEngProc.StartInfo.CreateNoWindow = this.serviceParams.IsDebuggingOn ? true : false;
+      this.poisoningEngProc.StartInfo.WindowStyle = this.serviceParams.AttackServiceHost.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
+      this.poisoningEngProc.StartInfo.CreateNoWindow = this.serviceParams.AttackServiceHost.IsDebuggingOn ? true : false;
       this.poisoningEngProc.EnableRaisingEvents = true;
       this.poisoningEngProc.Exited += new EventHandler(this.OnServiceExited);
       this.serviceStatus = ServiceStatus.Running;

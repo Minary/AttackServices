@@ -1,40 +1,37 @@
-﻿namespace Minary.AttackService
+﻿namespace Minary.AttackService.Main
 {
   using MinaryLib.AttackService.Class;
   using MinaryLib.AttackService.Enum;
   using MinaryLib.AttackService.Interface;
   using System;
-  using System.Collections.Generic;
   using System.Diagnostics;
   using System.IO;
   using System.Net;
   using System.Net.NetworkInformation;
 
 
-  public class HttpReverseProxy : IAttackService
+  public class AS_HttpReverseProxy : IAttackService
   {
 
     #region MEMBERS
 
+    private const string serviceName = "HttpReverseProxy";
+
     private ServiceStatus serviceStatus;
     private AttackServiceParameters serviceParams;
-    private Dictionary<string, SubModule> subModules;
     private Process httpReverseProxyProc;
 
     // Sniffer process config
-    public static string attackServicesDir = "attackservices";
-    private static string httpReverseProxyServiceDir = Path.Combine(attackServicesDir, "Sniffer");
-    private static string httpReverseProxyBinaryPath = Path.Combine(httpReverseProxyServiceDir, "Sniffer.exe");
+    private static string httpReverseProxyBinaryPath = Path.Combine(serviceName, "HttpReverseProxy.exe");
 
     #endregion
     
 
     #region PUBLIC
 
-    public HttpReverseProxy(AttackServiceParameters serviceParams, Dictionary<string, SubModule> subModules)
+    public AS_HttpReverseProxy(AttackServiceParameters serviceParams)
     {
       this.serviceParams = serviceParams;
-      this.subModules = subModules;
       this.serviceStatus = ServiceStatus.NotRunning;
 
       // Register attack service
@@ -61,7 +58,7 @@
 
       this.httpReverseProxyProc.EnableRaisingEvents = false;
       this.httpReverseProxyProc.Exited += null;
-      this.serviceParams.AttackServiceHost.OnServiceExited(this.serviceParams.ServiceName, exitCode);
+      this.serviceParams.AttackServiceHost.OnServiceExited(serviceName, exitCode);
     }
 
 
@@ -95,15 +92,9 @@
 
     #region PROPERTIES
 
-    public string ServiceName { get { return this.serviceParams.ServiceName; } set { } }
-
-    public string WorkingDirectory { get { return this.serviceParams.ServiceWorkingDir; } set { } }
-
-    public Dictionary<string, SubModule> SubModules { get { return this.subModules; } set { } }
+    public string ServiceName { get { return serviceName; } set { } }
 
     public ServiceStatus Status { get { return this.serviceStatus; } set { this.serviceStatus = value; } }
-
-    public IAttackServiceHost AttackServiceHost { get; set; }
 
     #endregion
 
@@ -112,8 +103,8 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters)
     {
-      string proxyBinaryFullPath = Path.Combine(Directory.GetCurrentDirectory(), httpReverseProxyBinaryPath);
-      string workingDirectory = Path.Combine(Directory.GetCurrentDirectory(), attackServicesDir);
+      string proxyBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, httpReverseProxyBinaryPath);
+      string workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
       string hostName = "localhost";
       DateTime validityStartDate = DateTime.Now;
       DateTime validityEndDate = validityStartDate.AddYears(10);
@@ -123,7 +114,6 @@
       string certificateFileFullPath = Path.Combine(certificateDirectoryFullPath, certificateFileName);
       string certificateRelativePath = Path.Combine(certificateDirectoryName, certificateFileName);
 
-//      string httpReverseProxyBinaryPath = Path.Combine(Directory.GetCurrentDirectory(), Config.HttpReverseProxyBinaryPath);
       string processParameters = string.Format("/httpport 80 /httpsport 443 /loglevel info /certificate {0}", certificateRelativePath);
 
       // If certificate directory does not exist create it
@@ -153,10 +143,10 @@
       // Start process
       this.httpReverseProxyProc = new Process();
       this.httpReverseProxyProc.StartInfo.WorkingDirectory = workingDirectory;
-      this.httpReverseProxyProc.StartInfo.FileName = httpReverseProxyBinaryPath;
+      this.httpReverseProxyProc.StartInfo.FileName = proxyBinaryFullPath;
       this.httpReverseProxyProc.StartInfo.Arguments = processParameters;
-      this.httpReverseProxyProc.StartInfo.WindowStyle = this.serviceParams.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
-      this.httpReverseProxyProc.StartInfo.CreateNoWindow = this.serviceParams.IsDebuggingOn ? true : false;
+      this.httpReverseProxyProc.StartInfo.WindowStyle = this.serviceParams.AttackServiceHost.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
+      this.httpReverseProxyProc.StartInfo.CreateNoWindow = this.serviceParams.AttackServiceHost.IsDebuggingOn ? true : false;
       this.httpReverseProxyProc.EnableRaisingEvents = true;
       this.httpReverseProxyProc.Exited += new EventHandler(this.OnServiceExited);
 
