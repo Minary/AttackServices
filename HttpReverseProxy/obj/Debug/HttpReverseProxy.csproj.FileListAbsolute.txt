@@ -1,7 +1,0 @@
-C:\Users\run\code\Build\AttackServices\AttackServices\HttpReverseProxy\bin\Debug\MinaryLib.dll
-C:\Users\run\code\Build\AttackServices\AttackServices\HttpReverseProxy\bin\Debug\NativeWindowsLib.dll
-C:\Users\run\code\Build\AttackServices\AttackServices\HttpReverseProxy\bin\Debug\AS_HttpReverseProxy.dll
-C:\Users\run\code\Build\AttackServices\AttackServices\HttpReverseProxy\bin\Debug\AS_HttpReverseProxy.pdb
-C:\Users\run\code\Build\AttackServices\AttackServices\HttpReverseProxy\obj\Debug\HttpReverseProxy.csprojResolveAssemblyReference.cache
-C:\Users\run\code\Build\AttackServices\AttackServices\HttpReverseProxy\obj\Debug\AS_HttpReverseProxy.dll
-C:\Users\run\code\Build\AttackServices\AttackServices\HttpReverseProxy\obj\Debug\AS_HttpReverseProxy.pdb
