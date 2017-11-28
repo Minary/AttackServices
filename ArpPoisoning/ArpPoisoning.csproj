@@ -7,8 +7,8 @@
     <ProjectGuid>{45D96334-6F4A-4185-B116-84A932AAF696}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ApePoisoning</RootNamespace>
-    <AssemblyName>AS_ApePoisoning</AssemblyName>
+    <RootNamespace>ArpPoisoning</RootNamespace>
+    <AssemblyName>AS_ArpPoisoning</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,8 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MinaryLib">
-      <HintPath>..\..\..\Minary\EXTERNAL\MinaryLib.dll</HintPath>
+    <Reference Include="MinaryLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Minary\EXTERNAL\MinaryLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,8 +50,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(SolutionDir)..\..\Minary\EXTERNAL\" mkdir "$(SolutionDir)..\..\Minary\EXTERNAL\"
-echo xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\Minary\EXTERNAL\
-xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\Minary\EXTERNAL\</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(SolutionDir)..\Minary\EXTERNAL\" mkdir "$(SolutionDir)..\Minary\EXTERNAL\"
+echo xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\Minary\EXTERNAL\
+xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\Minary\EXTERNAL\</PostBuildEvent>
   </PropertyGroup>
 </Project>

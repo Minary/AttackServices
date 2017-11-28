@@ -30,8 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MinaryLib">
-      <HintPath>..\..\..\Minary\EXTERNAL\MinaryLib.dll</HintPath>
+    <Reference Include="MinaryLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Minary\EXTERNAL\MinaryLib.dll</HintPath>
     </Reference>
     <Reference Include="NativeWindowsLib">
       <HintPath>..\..\..\Minary\EXTERNAL\NativeWindowsLib.dll</HintPath>
@@ -51,8 +52,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(SolutionDir)..\..\Minary\EXTERNAL\" mkdir "$(SolutionDir)..\..\Minary\EXTERNAL\"
-echo xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\Minary\EXTERNAL\
-xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\Minary\EXTERNAL\</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(SolutionDir)..\Minary\EXTERNAL\" mkdir "$(SolutionDir)..\Minary\EXTERNAL\"
+echo xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\Minary\EXTERNAL\
+xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\Minary\EXTERNAL\</PostBuildEvent>
   </PropertyGroup>
 </Project>
