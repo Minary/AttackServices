@@ -53,7 +53,7 @@ ipch/
 **/Release/
 **/x64/
 BUILDS/
-
+.vs/
 
 
 !Plugin**/app.config

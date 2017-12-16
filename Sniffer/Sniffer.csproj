@@ -49,8 +49,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(SolutionDir)..\Minary\EXTERNAL\" mkdir "$(SolutionDir)..\Minary\EXTERNAL\"
-echo xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\Minary\EXTERNAL\
-xcopy /Y  $(ProjectDir)\bin\$(Configuration)\$(TargetFileName) $(SolutionDir)..\Minary\EXTERNAL\</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(ProjectDir)..\..\Minary\EXTERNAL" (
+  mkdir "$(ProjectDir)..\..\Minary\EXTERNAL"
+)
+echo xcopy /Y  "$(TargetPath)" "$(ProjectDir)..\..\Minary\EXTERNAL\"
+xcopy /Y  "$(TargetPath)" "$(ProjectDir)..\..\Minary\EXTERNAL\"</PostBuildEvent>
   </PropertyGroup>
 </Project>
