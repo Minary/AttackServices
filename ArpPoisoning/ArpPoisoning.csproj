@@ -30,9 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MinaryLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Minary\EXTERNAL\MinaryLib.dll</HintPath>
+    <Reference Include="MinaryLib">
+      <HintPath>LIBRARIES\MinaryLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,5 +54,12 @@
 )
 echo xcopy /Y  "$(TargetPath)" "$(ProjectDir)..\..\LIBRARIES\"
 xcopy /Y  "$(TargetPath)" "$(ProjectDir)..\..\LIBRARIES\"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>if not exist "$(ProjectDir)LIBRARIES" (
+  mkdir "$(ProjectDir)LIBRARIES"
+)
+echo xcopy /Y "$(ProjectDir)..\..\LIBRARIES\MinaryLib.dll"  "$(ProjectDir)LIBRARIES\" 
+xcopy /Y "$(ProjectDir)..\..\LIBRARIES\MinaryLib.dll"  "$(ProjectDir)LIBRARIES\"</PreBuildEvent>
   </PropertyGroup>
 </Project>
