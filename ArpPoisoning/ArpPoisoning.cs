@@ -4,7 +4,6 @@
   using MinaryLib.AttackService.Enum;
   using MinaryLib.AttackService.Interface;
   using System;
-  using System.Collections.Generic;
   using System.Diagnostics;
   using System.IO;
 
@@ -83,11 +82,11 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters)
     {
-      string targetHostsRecords = string.Empty;
-      string workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      string targetHostsFullPath = Path.Combine(workingDirectory, targetHostsFile);
-      string timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
-      string processParameters = string.Format("-x {0}", serviceParameters.SelectedIfcId);
+      var targetHostsRecords = string.Empty;
+      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
+      var targetHostsFullPath = Path.Combine(workingDirectory, targetHostsFile);
+      var timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+      var processParameters = $"-x {serviceParameters.SelectedIfcId}";
 
       if (string.IsNullOrEmpty(serviceParameters.SelectedIfcId))
       {
@@ -102,13 +101,13 @@
       }
 
       // Write APE targetSystem hosts to list
-      foreach (string tmpTargetMac in serviceParameters.TargetList.Keys)
+      foreach (var tmpTargetMac in serviceParameters.TargetList.Keys)
       {
-        targetHostsRecords += string.Format("{0},{1}\r\n", serviceParameters.TargetList[tmpTargetMac], tmpTargetMac);
+        targetHostsRecords += $"{serviceParameters.TargetList[tmpTargetMac]},{tmpTargetMac}\r\n";
         this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.StartService(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, serviceParameters.TargetList[tmpTargetMac]);
       }
 
-      using (StreamWriter outputFile = new StreamWriter(targetHostsFullPath))
+      using (var outputFile = new StreamWriter(targetHostsFullPath))
       {
         targetHostsRecords = targetHostsRecords.Trim();
         outputFile.Write(targetHostsRecords);
@@ -150,7 +149,7 @@
 
       try
       {
-        if (this.poisoningEngProc != null && !this.poisoningEngProc.HasExited)
+        if (this.poisoningEngProc.HasExited == false)
         {
           this.poisoningEngProc.Kill();
           this.poisoningEngProc = null;
@@ -158,7 +157,7 @@
       }
       catch (Exception ex)
       {
-        this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.StopService(Exception): {0}", ex.Message);
+        this.serviceParams.AttackServiceHost.LogMessage($"ArpPoisoning.StopService(Exception): {ex.Message}");
       }
 
       return ServiceStatus.NotRunning;

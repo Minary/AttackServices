@@ -4,7 +4,6 @@
   using MinaryLib.AttackService.Enum;
   using MinaryLib.AttackService.Interface;
   using System;
-  using System.Collections.Generic;
   using System.Diagnostics;
   using System.IO;
 
@@ -15,7 +14,6 @@
     #region MEMBERS
 
     private const string serviceName = "Sniffer";
-
     private ServiceStatus serviceStatus;
     private AttackServiceParameters serviceParams;
     private Process snifferProc;
@@ -44,7 +42,7 @@
 
     private void OnServiceExited(object sender, System.EventArgs e)
     {
-      int exitCode = -99999;
+      var exitCode = -99999;
 
       try
       {
@@ -78,9 +76,9 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters)
     {
-      string snifferBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, snifferBinaryPath);
-      string workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      string processParameters = string.Format("-s {0} -p {1}", serviceParameters.SelectedIfcId, this.serviceParams.PipeName);
+      var snifferBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, snifferBinaryPath);
+      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
+      var processParameters = $"-s {serviceParameters.SelectedIfcId} -p {this.serviceParams.PipeName}";
 
       this.snifferProc = new Process();
       this.snifferProc.StartInfo.FileName = snifferBinaryFullPath;
@@ -114,7 +112,7 @@
 
       try
       {
-        if (this.snifferProc != null && !this.snifferProc.HasExited)
+        if (this.snifferProc?.HasExited == false)
         {
           this.snifferProc.Kill();
           this.snifferProc = null;

@@ -45,7 +45,7 @@
 
     private void OnServiceExited(object sender, System.EventArgs e)
     {
-      int exitCode = -99999;
+      var exitCode = -99999;
 
       try
       {
@@ -69,9 +69,9 @@
         throw new Exception("The port is invalid");
       }
 
-      bool isPortAvailable = true;
-      IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-      IPEndPoint[] ipEndPoints = ipGlobalProperties.GetActiveTcpListeners();
+      var isPortAvailable = true;
+      var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+      var ipEndPoints = ipGlobalProperties.GetActiveTcpListeners();
 
       foreach (IPEndPoint endPoint in ipEndPoints)
       {
@@ -103,18 +103,18 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters)
     {
-      string proxyBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, httpReverseProxyBinaryPath);
-      string workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      string hostName = "localhost";
-      DateTime validityStartDate = DateTime.Now;
-      DateTime validityEndDate = validityStartDate.AddYears(10);
-      string certificateFileName = "defaultCertificate.pfx";
-      string certificateDirectoryName = "Certificates";
-      string certificateDirectoryFullPath = Path.Combine(workingDirectory, certificateDirectoryName);
-      string certificateFileFullPath = Path.Combine(certificateDirectoryFullPath, certificateFileName);
-      string certificateRelativePath = Path.Combine(certificateDirectoryName, certificateFileName);
+      var proxyBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, httpReverseProxyBinaryPath);
+      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
+      var hostName = "localhost";
+      var validityStartDate = DateTime.Now;
+      var validityEndDate = validityStartDate.AddYears(10);
+      var certificateFileName = "defaultCertificate.pfx";
+      var certificateDirectoryName = "Certificates";
+      var certificateDirectoryFullPath = Path.Combine(workingDirectory, certificateDirectoryName);
+      var certificateFileFullPath = Path.Combine(certificateDirectoryFullPath, certificateFileName);
+      var certificateRelativePath = Path.Combine(certificateDirectoryName, certificateFileName);
 
-      string processParameters = string.Format("/httpport 80 /httpsport 443 /loglevel info /certificate {0}", certificateRelativePath);
+      string processParameters = $"/httpport 80 /httpsport 443 /loglevel info /certificate {certificateRelativePath}";
 
       // If certificate directory does not exist create it
       if (!Directory.Exists(certificateDirectoryFullPath))
@@ -173,7 +173,7 @@
 
       try
       {
-        if (this.httpReverseProxyProc != null && !this.httpReverseProxyProc.HasExited)
+        if (this.httpReverseProxyProc.HasExited == false)
         {
           this.httpReverseProxyProc.Kill();
           this.httpReverseProxyProc = null;
