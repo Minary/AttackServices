@@ -22,7 +22,6 @@
     // APE process config
     private static string firewallRulesFile = ".fwrules";
     private static string targetHostsFile = ".targethosts";
-    private static string dnsPoisoningHostsFile = ".dnshosts";
 
     private static string apeProcessName = "Ape";
     private static string apeBinaryPath = Path.Combine(serviceName, "Ape.exe");
