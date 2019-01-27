@@ -4,6 +4,7 @@
   using MinaryLib.AttackService.Enum;
   using MinaryLib.AttackService.Interface;
   using System;
+  using System.Collections.Generic;
   using System.Diagnostics;
   using System.IO;
   using System.Net;
@@ -101,7 +102,7 @@
 
     #region PUBLIC
 
-    public ServiceStatus StartService(StartServiceParameters serviceParameters)
+    public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, object> pluginsParameters)
     {
       var proxyBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, httpReverseProxyBinaryPath);
       var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);

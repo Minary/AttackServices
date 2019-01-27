@@ -4,6 +4,7 @@
   using MinaryLib.AttackService.Enum;
   using MinaryLib.AttackService.Interface;
   using System;
+  using System.Collections.Generic;
   using System.Diagnostics;
   using System.IO;
 
@@ -79,7 +80,7 @@
 
     #region PUBLIC
 
-    public ServiceStatus StartService(StartServiceParameters serviceParameters)
+    public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, object> pluginsParameters)
     {
       var targetHostsRecords = string.Empty;
       var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
