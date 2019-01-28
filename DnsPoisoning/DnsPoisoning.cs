@@ -4,6 +4,7 @@
   using MinaryLib.AttackService.Enum;
   using MinaryLib.AttackService.Interface;
   using System;
+  using System.Collections.Generic;
   using System.Diagnostics;
   using System.IO;
 
@@ -20,7 +21,6 @@
     private Process poisoningEngProc;
 
     // DnsPoisoning process config
-    private static string targetHostsFile = ".targethosts";
     private static string dnsPoisoningHostsFile = ".dnshosts";
 
     private static string DnsPoisoningProcessName = "DnsPoisoning";
@@ -79,13 +79,18 @@
 
     #region PUBLIC
 
-    public ServiceStatus StartService(StartServiceParameters serviceParameters)
+    public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, object> pluginsParameters)
     {
-      var targetHostsRecords = string.Empty;
+      var poisoningHostsRecords = string.Empty;
       var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      var targetHostsFullPath = Path.Combine(workingDirectory, targetHostsFile);
+      var poisoningHostsFullPath = Path.Combine(workingDirectory, dnsPoisoningHostsFile);
       var timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
       var processParameters = $"-x {serviceParameters.SelectedIfcId}";
+
+      if (File.Exists(poisoningHostsFullPath))
+      {
+        File.Delete(poisoningHostsFullPath);
+      }
 
       if (string.IsNullOrEmpty(serviceParameters.SelectedIfcId))
       {
@@ -96,22 +101,34 @@
       {
         this.serviceStatus = ServiceStatus.NotRunning;
         this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.StartService(): No target system selected");
-        return ServiceStatus.NotRunning;
       }
 
-      // Write DNS Poisoning spoofing records to list
-      foreach (var tmpTargetMac in serviceParameters.TargetList.Keys)
+      if (pluginsParameters == null ||
+          pluginsParameters.Count <= 0 &&
+          pluginsParameters.ContainsKey("dnspoisoning") == false)
       {
-        targetHostsRecords += $"{serviceParameters.TargetList[tmpTargetMac]},{tmpTargetMac}\r\n";
-        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.StartService(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, serviceParameters.TargetList[tmpTargetMac]);
+        this.serviceStatus = ServiceStatus.NotRunning;
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.StartService(): No poisoning parameters were passed");
       }
 
-      using (var outputFile = new StreamWriter(targetHostsFullPath))
+      List<string> pluginParamsList = pluginsParameters["dnspoisoning"] as List<string>;
+      if (pluginParamsList.Count > 0)
       {
-        targetHostsRecords = targetHostsRecords.Trim();
-        outputFile.Write(targetHostsRecords);
+        poisoningHostsRecords = string.Join("\r\n", pluginParamsList);
       }
 
+      if (string.IsNullOrEmpty(poisoningHostsRecords) || 
+          string.IsNullOrWhiteSpace(poisoningHostsRecords))
+      {
+        this.serviceStatus = ServiceStatus.NotRunning;
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.StartService(): Could not determine poisoning records");
+      }
+
+      using (var outfile = new StreamWriter(poisoningHostsFullPath))
+      {
+        outfile.Write(poisoningHostsRecords);
+      }   
+      
       // Start process
       string dnsPoisoningBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, DnsPoisoningBinaryPath);
 

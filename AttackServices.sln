@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArpPoisoning", "ArpPoisoning\ArpPoisoning.csproj", "{45D96334-6F4A-4185-B116-84A932AAF696}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sniffer", "Sniffer\Sniffer.csproj", "{53CA4D62-3AFA-4E40-ACDF-4DE408548CF6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpReverseProxy", "HttpReverseProxy\HttpReverseProxy.csproj", "{DE1D5171-6370-4A6D-8A00-D9975FF78377}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnsPoisoning", "DnsPoisoning\DnsPoisoning.csproj", "{469C9E67-67F7-43BD-BD48-12059850B3C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,8 +29,15 @@ Global
 		{DE1D5171-6370-4A6D-8A00-D9975FF78377}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE1D5171-6370-4A6D-8A00-D9975FF78377}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE1D5171-6370-4A6D-8A00-D9975FF78377}.Release|Any CPU.Build.0 = Release|Any CPU
+		{469C9E67-67F7-43BD-BD48-12059850B3C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{469C9E67-67F7-43BD-BD48-12059850B3C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{469C9E67-67F7-43BD-BD48-12059850B3C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{469C9E67-67F7-43BD-BD48-12059850B3C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F97ADFD3-1A71-4076-B5F2-DD83702B6538}
 	EndGlobalSection
 EndGlobal
