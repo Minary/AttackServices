@@ -75,7 +75,7 @@
 
     #region PUBLIC
 
-    public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, object> pluginsParameters)
+    public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
     {
       var snifferBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, snifferBinaryPath);
       var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
