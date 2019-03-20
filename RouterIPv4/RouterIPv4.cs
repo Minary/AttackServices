@@ -21,6 +21,7 @@
 
     // RouterIPv4 process config
     private static string routerIPv4BinaryPath = Path.Combine(serviceName, "RouterIPv4.exe");
+    private static string targetHostsFile = ".targethosts";
 
     #endregion
 
@@ -77,10 +78,38 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
     {
-      var routerIPv4BinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, routerIPv4BinaryPath);
       var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      var processParameters = $"-s {serviceParameters.SelectedIfcId} -p {this.serviceParams.PipeName}";
+      var timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+      var processParameters = $"-x {serviceParameters.SelectedIfcId}";
 
+      if (string.IsNullOrEmpty(serviceParameters.SelectedIfcId))
+      {
+        throw new Exception("No interface was declared");
+      }
+
+      if (serviceParameters.TargetList.Count <= 0)
+      {
+        this.serviceStatus = ServiceStatus.NotRunning;
+        this.serviceParams.AttackServiceHost.LogMessage("RouterIPv4.StartService(): No target system selected");
+      }
+
+      try
+      {
+        // Write Target systems file
+        this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
+      }
+      catch (Exception e)
+      {
+        this.serviceStatus = ServiceStatus.NotRunning;
+        this.serviceParams.AttackServiceHost.LogMessage($"RouterIPv4.StartService(EXC): {e.Message}");
+
+        return ServiceStatus.NotRunning;
+      }
+
+
+
+      // Start process
+      var routerIPv4BinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, routerIPv4BinaryPath);
       this.routerIPv4Proc = new Process();
       this.routerIPv4Proc.StartInfo.FileName = routerIPv4BinaryFullPath;
       this.routerIPv4Proc.StartInfo.Arguments = processParameters;
@@ -131,10 +160,47 @@
       return ServiceStatus.NotRunning;
     }
 
-    #endregion
+
+
+
+    private void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
+    {
+      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
+      var arpPoisoningHostsFullPath = Path.Combine(workingDirectory, targetHostsFile);
+      var arpPoisoningHostsRecords = string.Empty;
+
+      if (File.Exists(arpPoisoningHostsFullPath))
+      {
+        File.Delete(arpPoisoningHostsFullPath);
+      }
+
+      // Keep all IP/MAC combination in output string
+      foreach (var tmpTargetMac in targetList.Keys)
+      {
+        arpPoisoningHostsRecords += $"{targetList[tmpTargetMac]},{tmpTargetMac}\r\n";
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteTargetSystemsConfigFile(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, targetList[tmpTargetMac]);
+      }
+
+      // Set status "Not running" if no records
+      // were put into output data buffer
+      if (string.IsNullOrEmpty(arpPoisoningHostsRecords) ||
+          string.IsNullOrWhiteSpace(arpPoisoningHostsRecords))
+      {
+        throw new Exception("Something is wrong with the attack parameters \'Target hosts\' for DnsPoisoning");
+      }
+
+      // Write
+      using (var outfile = new StreamWriter(arpPoisoningHostsFullPath))
+      {
+        outfile.Write(arpPoisoningHostsRecords);
+      }
+    }
+
 
     #endregion
 
+
+    #endregion
 
   }
 }
