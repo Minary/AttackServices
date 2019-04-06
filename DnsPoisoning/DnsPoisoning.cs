@@ -92,12 +92,6 @@
         throw new Exception("No interface was declared");
       }
 
-      if (serviceParameters.TargetList.Count <= 0)
-      {
-        this.serviceStatus = ServiceStatus.NotRunning;
-        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.StartService(): No target system selected");
-      }
-
       try
       {
         // Write DNS Poisoning ip/type/hostname file
@@ -187,7 +181,9 @@
           pluginsParameters.ContainsKey("dnspoisoning") == false ||
           pluginsParameters["dnspoisoning"] == null)
       {
-        throw new Exception("The parameters from the plugin 'DnsPoisoning' is null/invalid");
+//        throw new Exception("The parameters from the plugin 'DnsPoisoning' is null/invalid");
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteDnsPoisoningConfigFile(): The parameters from the plugin 'DnsPoisoning' is null/invalid");
+        return;
       }
 
       // Throw exception if the DnsPoisoning system list
@@ -196,7 +192,9 @@
       if (pluginParamsList == null ||
           pluginParamsList.Count < 0)
       {
-        throw new Exception("Something is wrong with the plugin parameters for DnsPoisoning");
+        //throw new Exception("Something is wrong with the plugin parameters for DnsPoisoning");
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteDnsPoisoningConfigFile(): Something is wrong with the plugin parameters for DnsPoisoning");
+        return;
       }
 
       poisoningHostsRecords = string.Join("\r\n", pluginParamsList);
@@ -217,6 +215,12 @@
 
     private void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
     {
+      if (targetList == null ||
+          targetList.Count <= 0)
+      {
+        return;
+      }
+
       var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
       var arpPoisoningHostsFullPath = Path.Combine(workingDirectory, arpPoisoningHostsFile);
       var arpPoisoningHostsRecords = string.Empty;
