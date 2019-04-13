@@ -79,7 +79,7 @@
     {
       var snifferBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, snifferBinaryPath);
       var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      var processParameters = $"-s {serviceParameters.SelectedIfcId} -p {this.serviceParams.PipeName}";
+      var processParameters = $"-x {serviceParameters.SelectedIfcId} -p {this.serviceParams.PipeName}";
 
       this.snifferProc = new Process();
       this.snifferProc.StartInfo.FileName = snifferBinaryFullPath;

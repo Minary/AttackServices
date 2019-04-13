@@ -114,8 +114,8 @@
       var certificateDirectoryFullPath = Path.Combine(workingDirectory, certificateDirectoryName);
       var certificateFileFullPath = Path.Combine(certificateDirectoryFullPath, certificateFileName);
       var certificateRelativePath = Path.Combine(certificateDirectoryName, certificateFileName);
-
-      string processParameters = $"/httpport 80 /httpsport 443 /loglevel info /certificate {certificateRelativePath}";
+      var logLevel = serviceParams.AttackServiceHost.IsDebuggingOn ? "debug" : "info";
+      string processParameters = $"/httpport 80 /httpsport 443 /loglevel {logLevel} /certificate {certificateRelativePath}";
 
       // If certificate directory does not exist create it
       if (!Directory.Exists(certificateDirectoryFullPath))
