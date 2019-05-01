@@ -93,20 +93,8 @@
         this.serviceParams.AttackServiceHost.LogMessage("RouterIPv4.StartService(): No target system selected");
       }
 
-      try
-      {
-        // Write Target systems file
-        this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
-      }
-      catch (Exception e)
-      {
-        this.serviceStatus = ServiceStatus.NotRunning;
-        this.serviceParams.AttackServiceHost.LogMessage($"RouterIPv4.StartService(EXC): {e.Message}");
-
-        return ServiceStatus.NotRunning;
-      }
-
-
+      // Write config files
+      this.WriteConfigFiles(serviceParameters, pluginsParameters);
 
       // Start process
       var routerIPv4BinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, routerIPv4BinaryPath);
@@ -161,7 +149,28 @@
     }
 
 
+    public bool WriteConfigFiles(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
+    {
+      try
+      {
+        // Write Target systems file
+        this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
+      }
+      catch (Exception e)
+      {
+        this.serviceStatus = ServiceStatus.NotRunning;
+        this.serviceParams.AttackServiceHost.LogMessage($"RouterIPv4.StartService(EXC): {e.Message}");
 
+        return false;
+      }
+
+      return true;
+    }
+
+    #endregion
+
+
+    #region PRIVATE
 
     private void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
     {
@@ -178,7 +187,7 @@
       foreach (var tmpTargetMac in targetList.Keys)
       {
         arpPoisoningHostsRecords += $"{targetList[tmpTargetMac]},{tmpTargetMac}\r\n";
-        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteTargetSystemsConfigFile(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, targetList[tmpTargetMac]);
+        this.serviceParams.AttackServiceHost.LogMessage("RouterIPv4.WriteTargetSystemsConfigFile(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, targetList[tmpTargetMac]);
       }
 
       // Set status "Not running" if no records
@@ -186,7 +195,7 @@
       if (string.IsNullOrEmpty(arpPoisoningHostsRecords) ||
           string.IsNullOrWhiteSpace(arpPoisoningHostsRecords))
       {
-        throw new Exception("Something is wrong with the attack parameters \'Target hosts\' for DnsPoisoning");
+        throw new Exception("Something is wrong with the attack parameters \'Target hosts\' for RouterIPv4");
       }
 
       // Write
@@ -196,9 +205,7 @@
       }
     }
 
-
     #endregion
-
 
     #endregion
 

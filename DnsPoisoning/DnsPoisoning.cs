@@ -92,19 +92,8 @@
         throw new Exception("No interface was declared");
       }
 
-      try
+      if (this.WriteConfigFiles(serviceParameters, pluginsParameters) == false)
       {
-        // Write DNS Poisoning ip/type/hostname file
-        this.WriteDnsPoisoningConfigFile(pluginsParameters);
-
-        // Write Target systems file
-        this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
-      }
-      catch (Exception e)
-      {
-        this.serviceStatus = ServiceStatus.NotRunning;
-        this.serviceParams.AttackServiceHost.LogMessage($"DnsPoisoning.StartService(EXC): {e.Message}");
-
         return ServiceStatus.NotRunning;
       }
 
@@ -158,6 +147,28 @@
       return ServiceStatus.NotRunning;
     }
 
+
+    public bool WriteConfigFiles(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
+    {
+      try
+      {
+        // Write DNS Poisoning ip/type/hostname file
+        this.WriteDnsPoisoningConfigFile(pluginsParameters);
+
+        // Write Target systems file
+        this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
+      }
+      catch (Exception e)
+      {
+        this.serviceStatus = ServiceStatus.NotRunning;
+        this.serviceParams.AttackServiceHost.LogMessage($"DnsPoisoning.StartService(EXC): {e.Message}");
+
+        return false;
+      }
+
+      return true;
+    }
+
     #endregion
 
 
@@ -181,8 +192,7 @@
           pluginsParameters.ContainsKey("dnspoisoning") == false ||
           pluginsParameters["dnspoisoning"] == null)
       {
-//        throw new Exception("The parameters from the plugin 'DnsPoisoning' is null/invalid");
-        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteDnsPoisoningConfigFile(): The parameters from the plugin 'DnsPoisoning' is null/invalid");
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteDnsPoisoningConfigFile(): The parameters of the plugin 'DnsPoisoning' is null/invalid");
         return;
       }
 

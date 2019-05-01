@@ -131,6 +131,12 @@
       return ServiceStatus.NotRunning;
     }
 
+
+    public bool WriteConfigFiles(StartServiceParameters hostParameters, Dictionary<string, List<object>> pluginsParameters)
+    {
+      return true;
+    }
+
     #endregion
 
     #endregion

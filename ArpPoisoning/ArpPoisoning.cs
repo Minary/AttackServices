@@ -26,6 +26,7 @@
 
     private static string apeProcessName = "Ape";
     private static string apeBinaryPath = Path.Combine(serviceName, "Ape.exe");
+    private string workingDirectory;
 
     #endregion
 
@@ -39,6 +40,9 @@
 
       // Register attack service
       this.serviceParams.AttackServiceHost.Register(this);
+
+      // Working directory
+      this.workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
     }
 
     #endregion
@@ -82,9 +86,6 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
     {
-      var targetHostsRecords = string.Empty;
-      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      var targetHostsFullPath = Path.Combine(workingDirectory, targetHostsFile);
       var timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
       var processParameters = $"-x {serviceParameters.SelectedIfcId}";
 
@@ -93,25 +94,16 @@
         throw new Exception("No interface was declared");
       }
 
+      // If no targets were declared write a log message
+      // but continue anyway. Target system can also be added at a later moment.
       if (serviceParameters.TargetList.Count <= 0)
       {
         this.serviceStatus = ServiceStatus.NotRunning;
         this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.StartService(): No target system selected");
-        return ServiceStatus.NotRunning;
       }
 
       // Write APE targetSystem hosts to list
-      foreach (var tmpTargetMac in serviceParameters.TargetList.Keys)
-      {
-        targetHostsRecords += $"{serviceParameters.TargetList[tmpTargetMac]},{tmpTargetMac}\r\n";
-        this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.StartService(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, serviceParameters.TargetList[tmpTargetMac]);
-      }
-
-      using (var outputFile = new StreamWriter(targetHostsFullPath))
-      {
-        targetHostsRecords = targetHostsRecords.Trim();
-        outputFile.Write(targetHostsRecords);
-      }
+      this.WriteConfigFiles(serviceParameters, pluginsParameters);
 
       // Start process
       string apeBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, apeBinaryPath);
@@ -161,6 +153,27 @@
       }
 
       return ServiceStatus.NotRunning;
+    }
+
+
+    public bool WriteConfigFiles(StartServiceParameters hostParameters, Dictionary<string, List<object>> pluginsParameters)
+    {
+      var targetHostsFullPath = Path.Combine(this.workingDirectory, targetHostsFile);
+      var targetHostsRecords = string.Empty;
+
+      foreach (var tmpTargetMac in hostParameters.TargetList.Keys)
+      {
+        targetHostsRecords += $"{hostParameters.TargetList[tmpTargetMac]},{tmpTargetMac}\r\n";
+        this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.WriteTargetsToFile(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, hostParameters.TargetList[tmpTargetMac]);
+      }
+
+      using (var outputFile = new StreamWriter(targetHostsFullPath))
+      {
+        targetHostsRecords = targetHostsRecords.Trim();
+        outputFile.Write(targetHostsRecords);
+      }
+
+      return true;
     }
 
     #endregion
