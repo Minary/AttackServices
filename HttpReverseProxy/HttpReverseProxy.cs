@@ -193,9 +193,8 @@
     }
 
 
-    public bool WriteConfigFiles(StartServiceParameters hostParameters, Dictionary<string, List<object>> pluginsParameters)
+    public void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
     {
-      return true;
     }
 
     #endregion

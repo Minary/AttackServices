@@ -27,6 +27,7 @@
 
     private static string DnsPoisoningProcessName = "DnsPoisoning";
     private static string DnsPoisoningBinaryPath = Path.Combine(serviceName, "DnsPoisoning.exe");
+    private string workingDirectory;
 
     #endregion
 
@@ -40,6 +41,9 @@
 
       // Register attack service
       this.serviceParams.AttackServiceHost.Register(this);
+
+      // Working directory
+      this.workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
     }
 
     #endregion
@@ -83,7 +87,6 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
     {
-      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
       var timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
       var processParameters = $"-x {serviceParameters.SelectedIfcId}";
 
@@ -92,16 +95,13 @@
         throw new Exception("No interface was declared");
       }
 
-      if (this.WriteConfigFiles(serviceParameters, pluginsParameters) == false)
-      {
-        return ServiceStatus.NotRunning;
-      }
+      this.WriteDnsPoisoningConfigFile(serviceParameters.TargetList);
 
       // Start process
       string dnsPoisoningBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, DnsPoisoningBinaryPath);
 
       this.poisoningEngProc = new Process();
-      this.poisoningEngProc.StartInfo.WorkingDirectory = workingDirectory;
+      this.poisoningEngProc.StartInfo.WorkingDirectory = this.workingDirectory;
       this.poisoningEngProc.StartInfo.FileName = dnsPoisoningBinaryFullPath;
       this.poisoningEngProc.StartInfo.Arguments = processParameters;
       this.poisoningEngProc.StartInfo.WindowStyle = this.serviceParams.AttackServiceHost.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
@@ -146,38 +146,11 @@
 
       return ServiceStatus.NotRunning;
     }
+    
 
-
-    public bool WriteConfigFiles(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
+    public void WriteDnsPoisoningConfigFile(Dictionary<string, string> pluginsParameters)
     {
-      try
-      {
-        // Write DNS Poisoning ip/type/hostname file
-        this.WriteDnsPoisoningConfigFile(pluginsParameters);
-
-        // Write Target systems file
-        this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
-      }
-      catch (Exception e)
-      {
-        this.serviceStatus = ServiceStatus.NotRunning;
-        this.serviceParams.AttackServiceHost.LogMessage($"DnsPoisoning.StartService(EXC): {e.Message}");
-
-        return false;
-      }
-
-      return true;
-    }
-
-    #endregion
-
-
-    #region PRIVATE
-
-    private void WriteDnsPoisoningConfigFile(Dictionary<string, List<object>> pluginsParameters)
-    {
-      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      var poisoningHostsFullPath = Path.Combine(workingDirectory, dnsPoisoningHostsFile);
+      var poisoningHostsFullPath = Path.Combine(this.workingDirectory, dnsPoisoningHostsFile);
       var poisoningHostsRecords = string.Empty;
 
       if (File.Exists(poisoningHostsFullPath))
@@ -223,21 +196,22 @@
     }
 
 
-    private void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
+    public void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
     {
+      // Fix targetlist if it is corrupt.
       if (targetList == null ||
-          targetList.Count <= 0)
+          targetList.Count < 0)
       {
-        return;
+        targetList = new Dictionary<string, string>();
       }
-
-      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      var arpPoisoningHostsFullPath = Path.Combine(workingDirectory, arpPoisoningHostsFile);
+      
+      var targetHostsFullPath = Path.Combine(this.workingDirectory, arpPoisoningHostsFile);
       var arpPoisoningHostsRecords = string.Empty;
 
-      if (File.Exists(arpPoisoningHostsFullPath))
+      // Remove old .targethost file
+      if (File.Exists(targetHostsFullPath))
       {
-        File.Delete(arpPoisoningHostsFullPath);
+        File.Delete(targetHostsFullPath);
       }
 
       // Keep all IP/MAC combination in output string
@@ -252,11 +226,11 @@
       if (string.IsNullOrEmpty(arpPoisoningHostsRecords) ||
           string.IsNullOrWhiteSpace(arpPoisoningHostsRecords))
       {
-        throw new Exception("Something is wrong with the attack parameters \'Target hosts\' for DnsPoisoning");
+        this.serviceParams.AttackServiceHost.LogMessage("The number of \'Target hosts\' for DnsPoisoning is zero/null");
       }
 
       // Write
-      using (var outfile = new StreamWriter(arpPoisoningHostsFullPath))
+      using (var outfile = new StreamWriter(targetHostsFullPath))
       {
         outfile.Write(arpPoisoningHostsRecords);
       }

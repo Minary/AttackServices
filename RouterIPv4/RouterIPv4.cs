@@ -22,6 +22,7 @@
     // RouterIPv4 process config
     private static string routerIPv4BinaryPath = Path.Combine(serviceName, "RouterIPv4.exe");
     private static string targetHostsFile = ".targethosts";
+    private string workingDirectory;
 
     #endregion
 
@@ -35,6 +36,9 @@
 
       // Register attack service
       this.serviceParams.AttackServiceHost.Register(this);
+
+      // Working directory
+      this.workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
     }
 
     #endregion
@@ -78,7 +82,6 @@
 
     public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
     {
-      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
       var timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
       var processParameters = $"-x {serviceParameters.SelectedIfcId}";
 
@@ -94,14 +97,14 @@
       }
 
       // Write config files
-      this.WriteConfigFiles(serviceParameters, pluginsParameters);
+      this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
 
       // Start process
       var routerIPv4BinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, routerIPv4BinaryPath);
       this.routerIPv4Proc = new Process();
       this.routerIPv4Proc.StartInfo.FileName = routerIPv4BinaryFullPath;
       this.routerIPv4Proc.StartInfo.Arguments = processParameters;
-      this.routerIPv4Proc.StartInfo.WorkingDirectory = workingDirectory;
+      this.routerIPv4Proc.StartInfo.WorkingDirectory = this.workingDirectory;
       this.routerIPv4Proc.StartInfo.WindowStyle = this.serviceParams.AttackServiceHost.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
       this.routerIPv4Proc.StartInfo.CreateNoWindow = this.serviceParams.AttackServiceHost.IsDebuggingOn ? true : false;
       this.routerIPv4Proc.EnableRaisingEvents = true;
@@ -149,35 +152,19 @@
     }
 
 
-    public bool WriteConfigFiles(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
-    {
-      try
+    public void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
+    {     
+      // Fix targetlist if it is corrupt.
+      if (targetList == null ||
+          targetList.Count < 0)
       {
-        // Write Target systems file
-        this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
+        targetList = new Dictionary<string, string>();
       }
-      catch (Exception e)
-      {
-        this.serviceStatus = ServiceStatus.NotRunning;
-        this.serviceParams.AttackServiceHost.LogMessage($"RouterIPv4.StartService(EXC): {e.Message}");
-
-        return false;
-      }
-
-      return true;
-    }
-
-    #endregion
-
-
-    #region PRIVATE
-
-    private void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
-    {
-      var workingDirectory = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, serviceName);
-      var arpPoisoningHostsFullPath = Path.Combine(workingDirectory, targetHostsFile);
+      
+      var arpPoisoningHostsFullPath = Path.Combine(this.workingDirectory, targetHostsFile);
       var arpPoisoningHostsRecords = string.Empty;
 
+      // Remove old .targethost file
       if (File.Exists(arpPoisoningHostsFullPath))
       {
         File.Delete(arpPoisoningHostsFullPath);
@@ -195,7 +182,7 @@
       if (string.IsNullOrEmpty(arpPoisoningHostsRecords) ||
           string.IsNullOrWhiteSpace(arpPoisoningHostsRecords))
       {
-        throw new Exception("Something is wrong with the attack parameters \'Target hosts\' for RouterIPv4");
+        this.serviceParams.AttackServiceHost.LogMessage("The number of \'Target hosts\' for RouterIPv4 is zero/null");
       }
 
       // Write

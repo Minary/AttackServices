@@ -103,13 +103,13 @@
       }
 
       // Write APE targetSystem hosts to list
-      this.WriteConfigFiles(serviceParameters, pluginsParameters);
+      this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
 
       // Start process
       string apeBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, apeBinaryPath);
 
       this.poisoningEngProc = new Process();
-      this.poisoningEngProc.StartInfo.WorkingDirectory = workingDirectory;
+      this.poisoningEngProc.StartInfo.WorkingDirectory = this.workingDirectory;
       this.poisoningEngProc.StartInfo.FileName = apeBinaryFullPath;
       this.poisoningEngProc.StartInfo.Arguments = processParameters;
       this.poisoningEngProc.StartInfo.WindowStyle = this.serviceParams.AttackServiceHost.IsDebuggingOn ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden;
@@ -156,15 +156,36 @@
     }
 
 
-    public bool WriteConfigFiles(StartServiceParameters hostParameters, Dictionary<string, List<object>> pluginsParameters)
+    public void WriteTargetSystemsConfigFile(Dictionary<string, string> targetList)
     {
+      // Fix targetlist if it is corrupt.
+      if (targetList == null ||
+          targetList.Count < 0)
+      {
+        targetList = new Dictionary<string, string>();
+      }
+      
       var targetHostsFullPath = Path.Combine(this.workingDirectory, targetHostsFile);
       var targetHostsRecords = string.Empty;
 
-      foreach (var tmpTargetMac in hostParameters.TargetList.Keys)
+      // Remove old .targethost file
+      if (File.Exists(targetHostsFullPath))
       {
-        targetHostsRecords += $"{hostParameters.TargetList[tmpTargetMac]},{tmpTargetMac}\r\n";
-        this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.WriteTargetsToFile(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, hostParameters.TargetList[tmpTargetMac]);
+        File.Delete(targetHostsFullPath);
+      }
+
+      foreach (var tmpTargetMac in targetList.Keys)
+      {
+        targetHostsRecords += $"{targetList[tmpTargetMac]},{tmpTargetMac}\r\n";
+        this.serviceParams.AttackServiceHost.LogMessage("ArpPoisoning.WriteTargetsToFile(): Poisoning targetSystem system: {0}/{1}", tmpTargetMac, targetList[tmpTargetMac]);
+      }
+
+      // Set status "Not running" if no records
+      // were put into output data buffer
+      if (string.IsNullOrEmpty(targetHostsRecords) ||
+          string.IsNullOrWhiteSpace(targetHostsRecords))
+      {
+        this.serviceParams.AttackServiceHost.LogMessage("The number of \'Target hosts\' for RouterIPv4 is zero/null");
       }
 
       using (var outputFile = new StreamWriter(targetHostsFullPath))
@@ -172,8 +193,6 @@
         targetHostsRecords = targetHostsRecords.Trim();
         outputFile.Write(targetHostsRecords);
       }
-
-      return true;
     }
 
     #endregion
