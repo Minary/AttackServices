@@ -90,12 +90,6 @@
         throw new Exception("No interface was declared");
       }
 
-      if (serviceParameters.TargetList.Count <= 0)
-      {
-        this.serviceStatus = ServiceStatus.NotRunning;
-        this.serviceParams.AttackServiceHost.LogMessage("RouterIPv4.StartService(): No target system selected");
-      }
-
       // Write config files
       this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
 
@@ -183,6 +177,7 @@
           string.IsNullOrWhiteSpace(arpPoisoningHostsRecords))
       {
         this.serviceParams.AttackServiceHost.LogMessage("The number of \'Target hosts\' for RouterIPv4 is zero/null");
+        return;
       }
 
       // Write

@@ -95,7 +95,11 @@
         throw new Exception("No interface was declared");
       }
 
-      this.WriteDnsPoisoningConfigFile(serviceParameters.TargetList);
+      // Write the .targetsystem  config file
+      this.WriteTargetSystemsConfigFile(serviceParameters.TargetList);
+
+      // Write the poisoning records file
+      this.WriteDnsPoisoningConfigFile(pluginsParameters);
 
       // Start process
       string dnsPoisoningBinaryFullPath = Path.Combine(this.serviceParams.AttackServicesWorkingDirFullPath, DnsPoisoningBinaryPath);
@@ -148,7 +152,7 @@
     }
     
 
-    public void WriteDnsPoisoningConfigFile(Dictionary<string, string> pluginsParameters)
+    public void WriteDnsPoisoningConfigFile(Dictionary<string, List<object>> pluginsParameters)
     {
       var poisoningHostsFullPath = Path.Combine(this.workingDirectory, dnsPoisoningHostsFile);
       var poisoningHostsRecords = string.Empty;
@@ -192,6 +196,8 @@
       using (var outfile = new StreamWriter(poisoningHostsFullPath))
       {
         outfile.Write(poisoningHostsRecords);
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteDnsPoisoningConfigFile(): Wrote: {0} target systems to {1}",
+                                                        pluginParamsList?.Count ?? 0, poisoningHostsFullPath);
       }
     }
 
@@ -233,6 +239,9 @@
       using (var outfile = new StreamWriter(targetHostsFullPath))
       {
         outfile.Write(arpPoisoningHostsRecords);
+        this.serviceParams.AttackServiceHost.LogMessage("DnsPoisoning.WriteTargetSystemsConfigFile(): Wrote: {0} target systems to {1}",
+                                                        targetList.Keys?.Count ?? 0, targetHostsFullPath);
+
       }
     }
 
