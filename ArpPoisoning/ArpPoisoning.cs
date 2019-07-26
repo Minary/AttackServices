@@ -79,12 +79,14 @@
 
     public ServiceStatus Status { get { return this.serviceStatus; } set { this.serviceStatus = value; } }
 
-    #endregion
+    public ServiceStartMode StartMode { get { return ServiceStartMode.OnStartSingle; } set { } }
+
+  #endregion
 
 
-    #region PUBLIC
+  #region PUBLIC
 
-    public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
+  public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
     {
       var timeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
       var processParameters = $"-x {serviceParameters.SelectedIfcId}";

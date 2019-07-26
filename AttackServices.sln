@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnsPoisoning", "DnsPoisonin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RouterIPv4", "RouterIPv4\RouterIPv4.csproj", "{E5E3F213-B8B0-4EF6-8E70-F0F58B2F1207}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArpScan", "ArpScan\ArpScan.csproj", "{13A95FB3-3B53-464B-9979-6906BAAC19D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{E5E3F213-B8B0-4EF6-8E70-F0F58B2F1207}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5E3F213-B8B0-4EF6-8E70-F0F58B2F1207}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5E3F213-B8B0-4EF6-8E70-F0F58B2F1207}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13A95FB3-3B53-464B-9979-6906BAAC19D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13A95FB3-3B53-464B-9979-6906BAAC19D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13A95FB3-3B53-464B-9979-6906BAAC19D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13A95FB3-3B53-464B-9979-6906BAAC19D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
