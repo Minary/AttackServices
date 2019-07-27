@@ -79,12 +79,12 @@
 
     public ServiceStatus Status { get { return this.serviceStatus; } set { this.serviceStatus = value; } }
 
-    public ServiceStartMode StartMode { get { return ServiceStartMode.OnStartSingle; } set { } }
+    public ServiceStartMode StartMode { get { return ServiceStartMode.OnStartAll2Attack; } set { } }
 
   #endregion
 
 
-  #region PUBLIC
+    #region PUBLIC
 
   public ServiceStatus StartService(StartServiceParameters serviceParameters, Dictionary<string, List<object>> pluginsParameters)
     {

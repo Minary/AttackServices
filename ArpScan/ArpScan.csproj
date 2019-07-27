@@ -7,10 +7,10 @@
     <ProjectGuid>{13A95FB3-3B53-464B-9979-6906BAAC19D8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ArpScan</RootNamespace>
-    <AssemblyName>ArpScan</AssemblyName>
+    <AssemblyName>AS_ArpScan</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -63,5 +63,12 @@
 )
 echo xcopy /Y "$(ProjectDir)..\..\LIBRARIES\MinaryLib.dll"  "$(ProjectDir)LIBRARIES\" 
 xcopy /Y "$(ProjectDir)..\..\LIBRARIES\MinaryLib.dll"  "$(ProjectDir)LIBRARIES\"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>if not exist "$(ProjectDir)..\..\LIBRERIES" (
+  mkdir "$(ProjectDir)..\..\LIBRARIES"
+)
+echo xcopy /Y  "$(TargetPath)" "$(ProjectDir)..\..\LIBRARIES\"
+xcopy /Y  "$(TargetPath)" "$(ProjectDir)..\..\LIBRARIES\"</PostBuildEvent>
   </PropertyGroup>
 </Project>
